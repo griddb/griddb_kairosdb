@@ -147,8 +147,6 @@ public class DataCache<T>
         {
             m_front.m_next = m_back;
             m_back.m_prev = m_front;
-            m_front.m_next = m_back; //modified
-            m_back.m_prev = m_front; //modified
             m_hashMap.clear();
         }
     }
