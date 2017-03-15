@@ -88,6 +88,34 @@ Execute the command on kairosdb-1.1.1 folder.
   
      $ java -cp tools/tablesaw-1.2.2.jar make run
 
+### Execution Example
+
+1. Append with Telnet API
+
+        #"put <metric name> <timestamp> <value> <tag> <tag>... "
+        $ echo "put cpu 1421720699000 0.8 siteNo=1 hostNo=1" | nc -w 30 10.45.100.4 4242
+
+2. Append with REST API
+
+        #Request  http://[host]:[port]/api/v1/datapoints
+        $ curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d 
+        '[{ "name": "cpu", "timestamp": 1421720799000, "type": "double", "value": 0.6, "tags":{"siteNo":"1", "hostNo":"1"}}]' 
+        http://10.45.100.4:8080/api/v1/datapoints 
+
+3. Query with REST API
+
+        #Request  http://[host]:[port]/api/v1/datapoints/query
+        $ curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d 
+        '{ "start_absolute": 1421720000000, 
+           "end_relative": { "value": "5", "unit": "days" }, 
+           "metrics": [ 
+             { "tags": {"siteNo": ["1"], "hostNo": ["1", "2"] }, 
+               "name": "cpu", 
+               "limit": 10000, 
+               "aggregators": [ { "name": "avg", "sampling": { "value": 10, "unit": "minutes" } } ]
+             }]}' http://10.45.100.4:8080/api/v1/datapoints/query 
+          --> {"queries":[{"sample_size":2,"results":[{"name":"cpu","group_by":[{"name":"type","type":"number"}],
+                                                 "tags":{"hostNo":["1"],"siteNo":["1"]},"values":[[1421720699000,0.7]]}]}]}
 
 ## Caution and Limitation
 
