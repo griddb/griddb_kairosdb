@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Proofpoint Inc.
- * Copyright (c) 2016 TOSHIBA CORPORATION.
+ * Copyright (c) 2017 TOSHIBA Digital Solutions Corporation
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *    limitations under the License.
  */
 /*
- * This file is modified by TOSHIBA CORPORATION.
+ * This file is modified by TOSHIBA Digital Solutions Corporation.
  *
  * This file is based on the file WriteBuffer.java
  * in https://github.com/kairosdb/kairosdb/archive/v1.1.1.zip

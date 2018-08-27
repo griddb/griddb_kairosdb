@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 /*
- * This file is modified by TOSHIBA CORPORATION.
+ * This file is modified by TOSHIBA Digital Solutions Corporation.
  *
  * This file is based on the file DataCache.java
  * in https://github.com/kairosdb/kairosdb/archive/v1.1.1.zip
