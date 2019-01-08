@@ -122,7 +122,7 @@ public class GriddbDatastore implements Datastore {
     /**
      * Delimiter.
      */
-    public static final String DELIMITER = "_";
+    public static final String DELIMITER = "=";
     /**
      * Empty string.
      */
@@ -143,22 +143,6 @@ public class GriddbDatastore implements Datastore {
      * Display error for ttl.
      */
     private static final String INVALID_TTL = "Invalid ttl value";
-    /**
-     * Display error for invalid metric name.
-     */
-    private static final String INVALID_METRIC_NAME = "Invalid metric name";
-    /**
-     * Ignore error on kairosdb auto insert metric.
-     */
-    private static final String AUTO_INSERT_KAIROS_METRIC_PREFIX = "kairosdb.";
-    /**
-     * Display error for invalid tag name.
-     */
-    private static final String INVALID_TAG_NAME = "Invalid tag name";
-    /**
-     * Display error for invalid tag value.
-     */
-    private static final String INVALID_TAG_VALUE = "Invalid tag value";
     /**
      * Display error for connection.
      */
@@ -358,20 +342,9 @@ public class GriddbDatastore implements Datastore {
         SortedMap<String, String> tags = new TreeMap<>();
         String metricName;
         int ttl = timeToLive;
-        final boolean kairosdbAutoInsertData =
-                inputMetricName.startsWith(AUTO_INSERT_KAIROS_METRIC_PREFIX);
 
-        if (kairosdbAutoInsertData) {
-            metricName = removeSpecialChars(inputMetricName);
-            for (final String tagName : inputTags.keySet()) {
-                final String tagValue = inputTags.get(tagName);
-                tags.put(removeSpecialChars(tagName),
-                        removeSpecialChars(tagValue));
-            }
-        } else {
-            metricName = inputMetricName;
-            tags = inputTags;
-        }
+        metricName = inputMetricName;
+        tags = inputTags;
 
         if (dataPoint == null) {
             throw new DatastoreException(INVALID_DATAPOINT);
@@ -403,11 +376,6 @@ public class GriddbDatastore implements Datastore {
         // name
         if (cachedKey == null) {
             try {
-                if (!kairosdbAutoInsertData) {
-                    verifyMetricName(metricName);
-                    verifyTags(tags);
-                }
-
                 final GridStore gridstore = m_gridstorePool.borrowObject();
                 // create container for metric name -row key index
                 createContainer(WriteBuffer.BUFFER_TYPE_ROW_KEY_INDEX,
@@ -490,6 +458,7 @@ public class GriddbDatastore implements Datastore {
                 LOGGER.error(CONNECTION_ERR, e3);
                 throw new DatastoreException(CONNECTION_ERR, e3);
             }
+
             m_dataPointWriteBufferList.get(pId % m_numberWriteBufferDataPoint)
                     .deleteData(rowKey, deleteQuery.getStartTime(),
                             deleteQuery.getEndTime(), DELIMITER);
@@ -734,14 +703,6 @@ public class GriddbDatastore implements Datastore {
         metricName = query.getName();
         tags = query.getTags();
 
-        // Validate metric name, tags
-        if (!metricName.startsWith(AUTO_INSERT_KAIROS_METRIC_PREFIX)) {
-            verifyMetricName(metricName);
-        } else {
-            metricName = removeSpecialChars(metricName);
-        }
-        verifyTags(tags);
-
         // Query database to get Container keys
         try {
             rowKeyContainer =
@@ -876,17 +837,6 @@ public class GriddbDatastore implements Datastore {
             m_gridstorePool.returnObject(gridstore);
         }
         return ret;
-    }
-
-    /**
-     * Remove all special characters except letters and numbers.
-     *
-     * @param input
-     *            Input String
-     * @return String after removing special characters
-     */
-    private String removeSpecialChars(final String input) {
-        return input.replaceAll("[^a-zA-Z0-9]+", "");
     }
 
     /**
@@ -1159,72 +1109,6 @@ public class GriddbDatastore implements Datastore {
             response = "MAX";
         }
         return response;
-    }
-
-    /**
-     * Check metric name with required conditions of gridDB.
-     *
-     * @param metricName
-     *            metric name to be verified
-     * @throws DatastoreException
-     *             output if input value is not satisfied required conditions
-     */
-    private void verifyMetricName(final String metricName)
-            throws DatastoreException {
-        // Validate metric names
-        if (!metricName.matches("[a-zA-Z0-9]+")
-                || metricName.substring(0, 1).matches("[0-9]")) {
-            throw new DatastoreException(INVALID_METRIC_NAME);
-        }
-    }
-
-    /**
-     * Check tags with required conditions of gridDB for put request.
-     *
-     * @param tags
-     *            set of tag name, tag value to be verified
-     * @throws DatastoreException
-     *             output if input value is not satisfied required conditions
-     */
-    private void verifyTags(final SortedMap<String, String> tags)
-            throws DatastoreException {
-        for (final String tagName : tags.keySet()) {
-            final String tagValue = tags.get(tagName);
-            if (!tagName.matches("[a-zA-Z0-9]+")) {
-                throw new DatastoreException(INVALID_TAG_NAME);
-            }
-            if (!tagValue.matches("[a-zA-Z0-9]+")) {
-                throw new DatastoreException(INVALID_TAG_VALUE);
-            }
-        }
-    }
-
-    /**
-     * Check tags with required conditions of gridDB for query, delete request.
-     *
-     * @param tags
-     *            set of tag name, tag value to be verified
-     * @throws DatastoreException
-     *             output if input value is not satisfied required conditions
-     */
-    private void verifyTags(final SetMultimap<String, String> tags)
-            throws DatastoreException {
-        // Validate tags
-        for (final String tagName : tags.keySet()) {
-            final Set<String> valueSet = tags.get(tagName);
-
-            // Validate tag names
-            if (!tagName.matches("[a-zA-Z0-9]+")) {
-                throw new DatastoreException(INVALID_TAG_NAME);
-            }
-
-            // Validate tag value
-            for (final String tagValue : valueSet) {
-                if (!tagValue.matches("[a-zA-Z0-9]+")) {
-                    throw new DatastoreException(INVALID_TAG_VALUE);
-                }
-            }
-        }
     }
 
     /**
