@@ -14,9 +14,9 @@ So, we made it possible to use GridDB as another backend of KairosDB.
 
 Library building and program execution are checked in the environment below.
 
-    OS:         CentOS6.7(x64)
-    Java:       JDK 1.8.0_101
-    GridDB:     Version 3.0
+    OS:         CentOS 6.9(x64)
+    Java:       JDK 1.8.0
+    GridDB:     Version 4.0
 	KairosDB:   Version 1.1.1
 
 ## QuickStart
@@ -122,8 +122,6 @@ Execute the command on kairosdb-1.1.1 folder.
   * Caution  
     Datapoint is stored in time series type container assigned for each different set of metric name, tag name and tag value.
     Datapoint time to live in seconds (TTL) is only applied to time series type container at creation time of container.
-  * Limitation  
-    Metric name, tag name, tag value in current database schema can only include alphabet and numerical characters, cannot contain special ones. The metric name should not be case sensitive and has to start with alphabet characters.
 
 ## Community
 
